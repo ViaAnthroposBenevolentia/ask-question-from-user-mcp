@@ -1,10 +1,10 @@
 # Ask Question From User MCP
 
-A simple MCP server that provides a tool to ask questions from the user via a native Windows dialog.
+A simple MCP server that provides a tool to ask questions from the user via a native dialog.
 
 ## Prerequisites
 
--   Windows Operating System
+-   Windows or macOS (Submit a PR to support Linux if you want, I can't directly test that)
 -   Node.js and npm
 
 ## Installation
@@ -28,7 +28,7 @@ To use this MCP server with Cursor, you need to add the following configuration 
         "ask-question-from-user-mcp": {
             "command": "node",
             "args": [
-                "C:\\Users\\YourUserName\\DirectoryName\\ask-question-from-user-mcp\\build\\index.js"
+                "/path/to/your/project/ask-question-from-user-mcp/build/index.js"
             ]
         }
     }
