@@ -4,7 +4,7 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "build": "tsc && cp src/script.ps1 build/"
+        "build": "tsc && cp src/script.ps1 build/ && cp src/script.sh build/"
     },
     "keywords": [],
     "author": "Chris Kyle",

@@ -20,29 +20,58 @@ server.tool(
     { question: z.string().describe("The question to ask the user") },
     async ({ question }) => {
         return new Promise((resolve) => {
-            const scriptPath = join(__dirname, "script.ps1");
+            let scriptPath;
+            let childProcess;
 
-            // Use PowerShell to show native Windows dialog
-            const powershellProcess = spawn(
-                "powershell.exe",
-                ["-ExecutionPolicy", "Bypass", "-File", scriptPath, question],
-                {
-                    stdio: ["pipe", "pipe", "pipe"],
-                }
-            );
+            switch (process.platform) {
+                case "win32":
+                    scriptPath = join(__dirname, "script.ps1");
+                    childProcess = spawn(
+                        "powershell.exe",
+                        [
+                            "-ExecutionPolicy",
+                            "Bypass",
+                            "-File",
+                            scriptPath,
+                            question,
+                        ],
+                        {
+                            stdio: ["pipe", "pipe", "pipe"],
+                        }
+                    );
+                    break;
+
+                case "darwin":
+                    scriptPath = join(__dirname, "script.sh");
+                    childProcess = spawn("bash", [scriptPath, question], {
+                        stdio: ["pipe", "pipe", "pipe"],
+                    });
+                    break;
+
+                default:
+                    resolve({
+                        content: [
+                            {
+                                type: "text",
+                                text: `Unsupported platform: ${process.platform}`,
+                            },
+                        ],
+                    });
+                    return;
+            }
 
             let output = "";
             let errorOutput = "";
 
-            powershellProcess.stdout.on("data", (data) => {
+            childProcess.stdout.on("data", (data) => {
                 output += data.toString();
             });
 
-            powershellProcess.stderr.on("data", (data) => {
+            childProcess.stderr.on("data", (data) => {
                 errorOutput += data.toString();
             });
 
-            powershellProcess.on("close", (code) => {
+            childProcess.on("close", (code) => {
                 const userAnswer = output.trim();
 
                 if (code === 0 && userAnswer) {
@@ -77,12 +106,12 @@ server.tool(
                 }
             });
 
-            powershellProcess.on("error", (error) => {
+            childProcess.on("error", (error) => {
                 resolve({
                     content: [
                         {
                             type: "text",
-                            text: `Error launching PowerShell dialog: ${error.message}`,
+                            text: `Error launching script: ${error.message}`,
                         },
                     ],
                 });
